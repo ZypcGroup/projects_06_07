@@ -5,4 +5,6 @@
  
   1. 和家豪 ， 项目是： 智邮普创信息提交系统 ， 项目GitHub地址 [点击这里](https://github.com/ZypcGroup/zypc_submit_info)
   2. 丁磊   ， 项目是： 垃圾邮箱分类，		项目 GitHub地址 [点击这里](https://github.com/MosBest/spam)
-  3. 张爱玲，项目是：西邮成绩查询前端，项目GitHub地址 [点击这里](https://github.com/zhangailing/-.git) 
+  3. 张爱玲，项目是：西邮成绩查询前端，项目GitHub地址 [点击这里](https://github.com/zhangailing/-.git)
+  4. 钟嘉豪 ， 项目是： 地铁乘客及管理员服务系统， 项目GitHub地址[点击这里](https://github.com/ZJH9Rondo/learngit.git)
+
