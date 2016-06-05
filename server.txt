@@ -1,0 +1,175 @@
+# include <stdio.h>
+# include <stdlib.h>
+# include <strings.h>
+# include <string.h>
+# include <sys/types.h>
+# include <sys/socket.h>
+//# include <memory.h>
+//# include <arpa/inet.h>
+//# include <signal.h>
+# include <unistd.h>
+//# include <linux/in.h>
+# include <netinet/in.h>
+# include <sys/stat.h>
+# include <fcntl.h>
+# include <netdb.h> 
+# include <dirent.h>
+# define PORT 8888    /*帧听端口地址*/
+# define BACKLOG 2    /*帧听队列长度*/ 
+# define HOSTLEN 256
+
+             
+copydir(char *srcdir,int sock_fd1)
+{
+         char *srcpath;
+         DIR *dir_ptr;
+         struct dirent *direntp;
+         srcpath = (char *)malloc(strlen(srcdir)+1+MAXNAMLEN+1);
+         if((dir_ptr = opendir(srcdir)) == NULL)
+                printf("出错"); 
+//              Oops("Cannot open directiry");
+         write(sock_fd1,srcdir,strlen(srcdir));
+         write(sock_fd1,"dir",3);
+         while((direntp = readdir(dir_ptr)) != NULL)
+        {
+                 sprintf(srcpath,"%s/%s",srcdir,direntp->d_name);
+                 if(isadir(srcpath))
+                 {
+                         if(strcmp(direntp->d_name,".") != 0 && strcmp(direntp->d_name,"..") != 0 )
+                        { 
+                                write(sock_fd1,srcpath,strlen(srcpath));
+                                write(sock_fd1,"dir",3);
+                                 continue;
+                         }       
+                 }       
+                 write(sock_fd1,srcpath,strlen(srcpath));
+                write(sock_fd1,"reg",3); 
+                do_copy(srcpath,sock_fd1);
+        }       
+         write(sock_fd1,"end",3);
+         close(sock_fd1);
+         closedir(dir_ptr);
+         free(srcpath); 
+}        
+do_copy(char *src,int sock_fd2)
+{
+        int in_fd,n_chars;
+        char buf[BUFSIZ];
+        if((in_fd = open(src,O_RDONLY)) == -1)
+                printf("出错");
+//               oops("open");
+        while((n_chars = read(in_fd,buf,BUFSIZ))>0)
+        {
+                 if(write(sock_fd2,buf,n_chars) != n_chars)
+//                      oops("write");
+                        printf("出错");
+         }
+        close(in_fd);
+ }
+isadir(char *str)
+{
+         struct stat info;
+         return ( stat(str,&info) != -1 && S_ISDIR(info.st_mode));
+ }
+void *malloc(size_t n)
+{
+         void *rv = malloc(n);
+         if(rv == NULL)
+                 printf("出错");
+//      oops("out of memory");
+         return rv;
+ }
+int main(int argc,char* argv[])
+{
+        int ss,sc;     /*ss为服务器的socket描述符，sc为客户端的socket描述符*/
+        struct sockaddr_in server_addr;         /*服务器地址结构*/
+        struct sockaddr_in client_addr;         /*客户端地址结构*/
+        int err,n_chars;
+        int in_fd;
+        pid_t pid;
+        char hostname[HOSTLEN];                 //from client
+        char dirname[BUFSIZ];
+        char buf[BUFSIZ];
+        struct hostent *hp;
+
+
+        //建立一个流式套接字
+        ss = socket(AF_INET, SOCK_STREAM, 0);
+        if(ss < 0)                              /*出错*/
+        {
+                printf("socket error\n");
+                return -1;
+        }
+
+        //设置服务器地址
+        bzero(&server_addr, sizeof(server_addr));       /*清零*/
+        gethostname(hostname, HOSTLEN );
+        hp = gethostbyname(hostname);
+        bcopy((void*)hp->h_addr,(void *)&server_addr.sin_addr, hp->h_length);
+        server_addr.sin_family = AF_INET;               /*协议族*/
+//        server_addr.sin_addr.s_addr = htonl(INADDR_ANY);/*本地地址*/
+        server_addr.sin_port = htons(PORT);             /*服务器端口*/
+
+        //绑定地址结构到套接字描述符
+        err = bind(ss, (struct sockaddr*)&server_addr, sizeof(server_addr));
+        if(err < 0)             /*出错*/
+        {
+                printf("bind error\n");
+                return -1;
+        }
+  //设置帧听
+        err = listen(ss, BACKLOG);
+        if(err < 0)             /*出错*/
+        {
+                printf("listen  error\n");
+                return -1;
+        }
+
+        //主循环过程
+        for(;;)
+        {
+      //          int addrlen = sizeof(struct sockaddr);
+
+                sc = accept(ss, NULL, NULL);           //wait for call
+                //接收客户端连接
+                if(sc == -1)              /*出错*/
+                {
+ //                       oops("accept");       /*结束本次循环*/
+                                printf("出错");
+                }
+
+                if(read(sc,dirname,BUFSIZ) == -1)
+//                      oops("read");
+                        printf("出错");
+                printf("%s\n",dirname);
+
+                if(isadir(dirname))
+                {
+                        copydir(dirname,sc);
+                 }
+                else
+                {
+                        write(sc,dirname,strlen(dirname));
+                        write(sc,"reg",3);
+                        do_copy(dirname,sc);
+                        write(sc,"end",3);
+                        close(sc);
+                }
+
+/*      {
+         if((in_fd = open(dirname,O_RDONLY)) == -1)
+//               oops("open");
+                        printf("出错");
+        while( (n_chars = read(in_fd,buf,BUFSIZ))>0)
+        {
+                 if(write(sc,buf,n_chars) != n_chars)
+//                      oops("write");
+                        printf("出错");
+        }
+         close(in_fd);
+        close(sc);
+         }
+ */
+        }
+}
+                                    
