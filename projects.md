@@ -1,4 +1,4 @@
-### 智邮普创工作室成员 近期项目 汇总信息
+﻿### 智邮普创工作室成员 近期项目 汇总信息
 
 
 - 项目列表 
@@ -11,3 +11,5 @@
   6. 刘梦维 项目是：智能医药管理系统，项目GitHub地址[点击这里](https://github.com/fightingliumeng/Medical-management-system)
   7. 张翔 ， 项目是： 简单的线程池， 项目GitHub地址 [点击这里](https://github.com/ZXANG/first.git)
   8. 王静 ， 项目是：西邮成绩查询，项目GitHub地址[点击这里](https://github.com/Hypnosis123/Risystem)
+  9. 刘琪 ， 项目是：远程CP 即：rget(remote get), 项目GitHub地址 [点击这里]
+(https://github.com/iquil/ser_client)
