@@ -13,4 +13,4 @@
   8. 王静 ， 项目是：西邮成绩查询，项目GitHub地址[点击这里](https://github.com/Hypnosis123/Risystem)
   9. 刘琪 ， 项目是：远程CP 即：rget(remote get), 项目GitHub地址 [点击这里]
 (https://github.com/iquil/ser_client)
-  10.张昕乐、许栋，项目是：基于C图形界面的矿难逃生游戏，项目Github地址 [点击这里](https://github.com/zhangxxkl/learn) 
+  10. 张昕乐、许栋，项目是：基于C图形界面的矿难逃生游戏，项目Github地址 [点击这里](https://github.com/zhangxxkl/learn) 
