@@ -1,0 +1,184 @@
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <getopt.h>
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <netdb.h>
+# include <arpa/inet.h>
+# include <netinet/in.h>
+# include <fcntl.h>
+# include <unistd.h>
+# define PORTNUM 1500
+# define COPYMODE 0644
+struct link
+{
+	int flag;
+	int length;
+};
+struct info
+{
+	int length;
+	char filename[256];
+	int filetype;
+	char errorinfo[256];
+};
+struct option long_options[]=
+{
+	{"recursive",required_argument,0,'r'},
+	{"force",required_argument,0,'f'},
+	{0,0,0,0}
+};
+int split(char *h, char *p, char *hp, const char *del)
+{
+	char *s = NULL;
+
+	s = strtok(hp,del);
+	if(s!=NULL)
+	{
+		strcpy(h,s);
+		s = strtok(NULL,del);
+	}
+	else return 0;
+	if(s!=NULL)
+	{
+		strcpy(p,s);
+		return 1;
+	}
+	else return 0;
+}
+int main(int argc,char *argv[])
+{
+	int opt,num=2;
+//	char *host_path, *host,*path;
+	char host_path[99]={0}, host[99]={0}, path[99]={0};
+	struct sockaddr_in servadd;
+	struct hostent *hp;
+	char dirname[BUFSIZ];	
+	char file_type[BUFSIZ];
+	char tail[BUFSIZ];
+	char buffer[BUFSIZ];
+	char yorn[2];
+	int out_fd,n_read;
+
+	while((opt = getopt_long(argc, argv, ":r:f:", long_options, NULL))!= -1)
+	{
+		switch(opt)
+		{
+			case 'r':strncpy(host_path,optarg,strlen(optarg));break;
+			case 'f':strncpy(host_path,optarg,strlen(optarg));break;
+			case '?':printf("scanf error!please input '-r' or '-f' \n");exit(0);
+		}
+	}
+
+	char *s1 = "-r", *s2 = "-f";
+	int x1 = strcmp(argv[1],s1);
+	int x2 = strcmp(argv[1],s2);
+	if(x1&&x2)
+	{
+		printf("scanf error!\n");
+		exit(0);
+	}
+//	else printf("scanf succeed!\n");
+	int s = 0;
+//
+	s= split(host,path,host_path,":");
+	if(!s)
+	{
+		printf("address error!\n");
+		exit(0);
+	}
+/*	else
+	{
+		printf("%s\n",host);
+		printf("%s\n",path);
+	}
+*/
+//	get a socket
+
+	int sock_id;
+	sock_id = socket(AF_INET, SOCK_STREAM,0);
+	if(sock_id == -1)
+		printf("socket error!");
+
+//	connect to server
+	
+	bzero(&servadd,sizeof(servadd));
+	hp = gethostbyname(host);
+	if(hp == NULL)
+	{
+		printf("gethostbyname error!\n");
+		exit(0);
+	}
+
+//	bcopy(hp->h_addr_list,(struct sockaddr*)&servadd.sin_addr,hp->h_length);
+	servadd.sin_port = htons(PORTNUM);
+	servadd.sin_family = AF_INET;
+	servadd.sin_addr.s_addr = inet_addr(host);
+	if(connect(sock_id,(struct sockaddr*)&servadd,sizeof(struct sockaddr))!=0)
+	{
+		printf("connect error!\n");
+		exit(0);
+	}
+	printf("connect succeed!\n");
+
+//	send file path,then read back results!
+//	printf("argc = %d\n",argc);	
+	while(argc-num-1>=0)	
+	{
+		if(write(sock_id,argv[num],strlen(argv[num])) == -1)
+		{
+			printf("write error!\n");
+			exit(0);
+		}
+		while(1)
+		{
+			read(sock_id,dirname,BUFSIZ);
+			read(sock_id,file_type,BUFSIZ);
+			if(strcmp(file_type,"dir")==0)
+				printf("create a dir!\n");
+			else if(strcmp(file_type,"reg") == 0)
+				{
+					if((out_fd = open(dirname, O_WRONLY)) != -1)
+					{
+						printf("%s exits,do you want to recover if(y or n)?",dirname);
+						scanf("%s",yorn);
+						if(strcmp(yorn,"n") == 0)
+						{
+							close(out_fd);
+							continue;
+						}
+						if(strcmp(yorn,"y") == 0)
+						{
+							close(out_fd);
+							out_fd = creat(dirname, COPYMODE);
+						}
+					}
+					else
+					{
+						out_fd = creat(dirname,COPYMODE);
+					}
+					while((n_read = read(sock_id,buffer,BUFSIZ))>0)
+					{
+						printf("%s\n",buffer);
+						if(write(out_fd,buffer,n_read) == -1)
+						{
+							printf("write error!\n");
+							exit(0);
+						}
+					}
+					close(out_fd);
+				}
+				read(sock_id,tail,BUFSIZ);
+				if(strcmp(tail,"end") == 0)
+				{
+					num++;
+					break;
+				}
+		}	
+	}
+
+	close(sock_id);
+	return 0;
+	
+}
