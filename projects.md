@@ -15,4 +15,4 @@
 (https://github.com/iquil/ser_client)
   10. 张昕乐、许栋，项目是：基于C图形界面的矿难逃生游戏，项目Github地址 [点击这里](https://github.com/zhangxxkl/learn)
   11. 张潇文，宁海静，项目是：2048小游戏，项目Github地址[点击这里](https://github.com/ningjingdexiatian/learngit)
-  12. 石永超，项目是:电子时钟的设计和实现，项目Github地址[点击这里](https://git@github.com:15529343201/zypc.git)
+  12. 石永超，项目是:学生成绩信息管理系统，项目Github地址[点击这里](https://git@github.com:15529343201/zypc.git)
