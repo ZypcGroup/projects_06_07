@@ -1,0 +1,511 @@
+    #include <stdio.h>  
+    #include <stdlib.h>  
+    #include <malloc.h>  
+    #include <string.h>  
+    #define LEN sizeof(STD)  
+    typedef struct student {  
+        char        xh[12];         /*学号*/  
+        char        xm[12];         /*姓名*/  
+        float       sxcj;           /*数学成绩*/  
+        float       cxsj;           /*程序设计成绩*/  
+        float       zf;             /*总分*/  
+        struct student  *next;          /*指向下条记录*/  
+    }STD;  
+    int NUM = 0;                    /* 定义全局变量，统计学生人数 */  
+    STD *head   = NULL;  
+      
+    void mainmenu();                        /* 主菜单 */  
+      
+    void record();                          /* 写入学生信息 */  
+      
+    void insert( struct student *p );       /* 插入学生信息 */  
+      
+    void print( struct student *p );        /* 打印信息 */  
+      
+    void display();                         /* 查看所有学生信息 */  
+      
+    void query();                           /* 创建查询 */  
+      
+    void query_by_num();                    /*按学号查询 */  
+      
+    void query_by_name();                   /*按姓名查询 */  
+      
+    void query_by_sxcj();                   /*按数学成绩查询 */  
+      
+    void query_by_cxsj();                   /*按程序设计成绩查询 */  
+      
+    void query_by_zf();                     /*按总分查询 */  
+      
+    void readData();                        /* 读取数据 */  
+      
+    void writeData();                       /* 写入数据 */  
+      
+    void freeAll();                         /* 释放结点 */  
+      
+    void del();                             /*删除学生信息 */  
+      
+    void change();                          /* 修改学生信息 */  
+      
+    void devise( struct student *p );  
+      
+    int main(void)  
+    {  
+        mainmenu();  
+    }  
+      
+      
+    /* 主菜单 */  
+    void mainmenu()  
+    {  
+        int choice;  
+        readData();  
+        do  
+        {  
+            printf( "\t\t\t +--------------------+\n" );  
+            printf( "\t\t\t | 学生信息管理系统 |\n" );  
+            printf( "\t\t\t | [1]--创建学生信息 |\n" );  
+            printf( "\t\t\t | [2]--浏览学生信息 |\n" );  
+            printf( "\t\t\t | [3]--查询学生信息 |\n" );  
+            printf( "\t\t\t | [4]--删除学生信息 |\n" );  
+            printf( "\t\t\t | [5]--修改学生信息 |\n" );  
+            printf( "\t\t\t | [6]--退出系统 |\n" );  
+            printf( "\t\t\t +--------------------+\n" );  
+            printf( "请输入操作选项：" );  
+            scanf( "%d", &choice );  
+            switch ( choice )  
+            {  
+            case 1:  
+                record();       /* 读入学生信息 */  
+                break;  
+            case 2:  
+                display();      /* 查看学生信息 */  
+                break;  
+            case 3:  
+                query();        /* 查询学生信息 */  
+                break;  
+            case 4:  
+                del();          /*删除学生信息 */  
+                break;  
+            case 5:  
+                change();       /* 修改学生信息 */  
+                break;  
+            default:  
+                printf( "无效选项!\n" );  
+                break;  
+            case 6:  
+                writeData();    /* 把学生信息写入文件中 */  
+                freeAll();      /* 释放所有结点 */  
+                exit( 0 );      /* 退出 */  
+            }  
+        }  
+        while ( choice != 6 );  
+    }  
+      
+      
+    /* 录入学生信息，每次只录入一个学生信息 */  
+    void record()  
+    {  
+        struct student *p0;  
+        p0 = (STD *) malloc( LEN );  
+        printf( "请输入学生的学号:" );  
+        scanf( "%s", &p0->xh );  
+        printf( "请输入学生的姓名:" );  
+        scanf( "%s", p0->xm );  
+        printf( "请输入学生的数学成绩:" );  
+        scanf( "%f", &p0->sxcj );  
+        printf( "请输入学生的程序设计成绩:" );  
+        scanf( "%f", &p0->cxsj );  
+        p0->zf = p0->sxcj + p0->cxsj;  
+        insert( p0 );   /* 每次录入一个学生信息后将其插入链表中 */  
+        printf( "该学生的信息为:\n" );  
+        printf( "学号\t姓名\t数学\t程序\t总分\n" );  
+        print( p0 );    /* 每次录入一个学生信息后输出其信息 */  
+    }  
+      
+      
+    /* 插入学生信息 */  
+    void insert( STD *stu )  
+    {  
+        STD *p0, *p1, *p2;  
+        p1  = head;  
+        p0  = stu;  
+        if ( head == NULL )  
+        {  
+            head        = p0;  
+            p0->next = NULL;  
+        }else  {  
+            while ( (p0->xh > p1->xh) && (p1->next != NULL) )  
+            {  
+                p2  = p1;  
+                p1  = p1->next;  
+            }  
+            if ( p0->xh <= p1->xh )  
+            {  
+                if ( head == p1 )  
+                    head = p0;  
+                else  
+                    p2->next = p0;  
+                p0->next = p1;  
+            }else  {  
+                p1->next = p0;  
+                p0->next = NULL;  
+            }  
+        }  
+        NUM++; /* 累加统计学生人数 */  
+    }  
+      
+      
+    /* 打印信息 */  
+    void print( struct student *p )  
+    {  
+        printf( "%s\t%s\t%-5.2f\t%-5.2f\t%-5.2f\n", p->xh, p->xm, p->sxcj, p->cxsj, p->zf );  
+    }  
+      
+      
+    /* 查看学生信息 */  
+    void display()  
+    {  
+        struct student *p;  
+        printf( "学生总人数:%d\n", NUM );  
+        p = head;  
+        if ( head != NULL )  
+        {  
+            printf( "学号\t姓名\t数学\t程序\t总分\n" );  
+            do  
+            {  
+                print( p );  
+                p = p->next;  
+            }  
+            while ( p != NULL );  
+        }  
+        printf( "\n" );  
+    }  
+      
+      
+    /* 查询学生信息 */  
+    void query()  
+    {  
+        int choice;  
+        do  
+        {  
+            printf( "+---------------------+\n" );  
+            printf( "|[1]--按学号查询 |\n" );  
+            printf( "|[2]--按姓名查询 |\n" );  
+            printf( "|[3]--数学成绩查询 |\n" );  
+            printf( "|[4]--程序设计成绩查询|\n" );  
+            printf( "|[5]--总分查询 |\n" );  
+            printf( "|[6]--返回主菜单 |\n" );  
+            printf( "+---------------------+\n" );  
+            printf( "请输入操作选项：" );  
+            scanf( "%d", &choice );  
+            switch ( choice )  
+            {  
+            case 1:  
+                query_by_num();  
+                break;  
+            case 2:  
+                query_by_name();  
+                break;  
+            case 3:  
+                query_by_sxcj();  
+                break;  
+            case 4:  
+                query_by_cxsj();  
+            case 5:  
+                query_by_zf();  
+            default:  
+                printf( "操作选项错误!\n" );  
+                break;  
+            case 6:  
+                return;  
+            }  
+        }  
+        while ( choice != 6 );  
+    }  
+      
+      
+    /*按学号查询学生信息 */  
+    void query_by_num()  
+    {  
+        char        num[10];  
+        struct student  *p1;  
+        printf( "请输入学生的学号：" );  
+        scanf( "%s", num );  
+        if ( head == NULL )  
+        {  
+            printf( "没有学生信息！\n" );  
+            return;  
+        }  
+        p1 = head;  
+        while ( strcmp( num, p1->xh ) != 0 && p1->next != NULL )  
+            p1 = p1->next;  
+        if ( strcmp( num, p1->xh ) == 0 )  
+        {  
+            printf( "学号\t姓名\t数学\t程序\t总分\n" );  
+            print( p1 );  
+        }else  
+            printf( "没有找到该学生信息！\n" );  
+    }  
+      
+      
+    /*按姓名查询学生信息 */  
+    void query_by_name()  
+    {  
+        char    name[20];  
+        STD *p1;  
+        printf( "请输入学生的姓名：" );  
+        scanf( "%s", name );  
+        if ( head == NULL )  
+        {  
+            printf( "没有学生信息！\n" );  
+            return;  
+        }  
+        p1 = head;  
+        while ( strcmp( name, p1->xm ) != 0 && p1->next != NULL )  
+            p1 = p1->next;  
+        if ( !strcmp( name, p1->xm ) )  
+        {  
+            printf( "学号\t姓名\t数学\t程序\t总分\n" );  
+            print( p1 );  
+        }else  
+            printf( "没有找到该学生信息！\n" );  
+    }  
+      
+      
+    /*按数学成绩查询 */  
+    void query_by_sxcj()  
+    {  
+        float   sxcj;  
+        STD *p1;  
+        printf( "请输入学生的数学成绩：" );  
+        scanf( "%f", &sxcj );  
+        if ( head == NULL )  
+        {  
+            printf( "没有学生信息！\n" );  
+            return;  
+        }  
+        p1 = head;  
+        while ( sxcj != p1->sxcj && p1->next != NULL )  
+            p1 = p1->next;  
+        if ( sxcj == p1->sxcj )  
+        {  
+            printf( "学号\t姓名\t数学\t程序\t总分\n" );  
+            print( p1 );  
+        }else  
+            printf( "没有找到该学生信息！\n" );  
+    }  
+      
+      
+    /*按程序设计成绩查询 */  
+    void query_by_cxsj()  
+    {  
+        float   cxsj;  
+        STD *p1;  
+        printf( "请输入学生的程序设计成绩：" );  
+        scanf( "%f", &cxsj );  
+        if ( head == NULL )  
+        {  
+            printf( "没有学生信息！\n" );  
+            return;  
+        }  
+        p1 = head;  
+        while ( cxsj != p1->cxsj && p1->next != NULL )  
+            p1 = p1->next;  
+        if ( cxsj == p1->cxsj )  
+        {  
+            printf( "学号\t姓名\t数学\t程序\t总分\n" );  
+            print( p1 );  
+        }else  
+            printf( "没有找到该学生信息！\n" );  
+    }  
+      
+      
+    /*按总分查询 */  
+    void query_by_zf()  
+    {  
+        float   zf;  
+        STD *p1;  
+        printf( "请输入学生的总分成绩：" );  
+        scanf( "%f", &zf );  
+        if ( head == NULL )  
+        {  
+            printf( "没有学生信息！\n" );  
+            return;  
+        }  
+        p1 = head;  
+        while ( zf != p1->zf && p1->next != NULL )  
+            p1 = p1->next;  
+        if ( zf == p1->zf )  
+        {  
+            printf( "学号\t姓名\t数学\t程序\t总分\n" );  
+            print( p1 );  
+        }else  
+            printf( "没有找到该学生信息！\n" );  
+    }  
+      
+      
+    /*删除学生信息 */  
+    void del()  
+    {  
+        struct student  *p1, *p2;  
+        char        num[12];  
+        if ( head == NULL )  
+        {  
+            printf( "没有学生信息！\n" );  
+            return;  
+        }  
+        printf( "请输入您要删除的学生的学号：" );  
+        scanf( "%s", num );  
+        p1 = head;  
+        while ( strcmp( num, p1->xh ) != 0 && p1->next != NULL )  
+        {  
+            p2  = p1;  
+            p1  = p1->next;  
+        }  
+        if ( strcmp( num, p1->xh ) == 0 )  
+        {  
+            if ( p1 == head )  
+                head = p1->next;  
+            else  
+                p2->next = p1->next;  
+            free( p1 );  
+            NUM--;  
+        }else  
+            printf( "没有该学生的信息！\n" );  
+    }  
+      
+      
+    /* 修改学生信息 */  
+    void change()  
+    {  
+        STD *p1, *p2;  
+        char    num[12];  
+        if ( head == NULL )  
+        {  
+            printf( "没有学生的信息！\n" );  
+            return;  
+        }  
+        printf( "请输入您要修改的学生的学号：" );  
+        scanf( "%s", num );  
+        p1 = head;  
+        while ( strcmp( num, p1->xh ) != 0 && p1->next != NULL )  
+        {  
+            p2  = p1;  
+            p1  = p1->next;  
+        }  
+        if ( strcmp( num, p1->xh ) == 0 )  
+            devise( p1 );  
+        else  
+            printf( "没有该学生的信息！\n" );  
+    }  
+      
+      
+    /* 修改学生信息 */  
+    void devise( struct student *p )  
+    {  
+        int choice;  
+        do  
+        {  
+            printf( "+------------------------------+\n" );  
+            printf( "|请选择您要修改的学生的信息内容|\n" );  
+            printf( "|[1]--学号 |\n" );  
+            printf( "|[2]--姓名 |\n" );  
+            printf( "|[3]--数学成绩 |\n" );  
+            printf( "|[4]--程序设计成绩 |\n" );  
+            printf( "|[5]--总分 |\n" );  
+            printf( "|[6]--取消 |\n" );  
+            printf( "+------------------------------+\n" );  
+            printf( "请输入操作选项：" );  
+            scanf( "%d", &choice );  
+            switch ( choice )  
+            {  
+            case 1:  
+                printf( "请输入新学号：" );  
+                scanf( "%s", p->xm );  
+                break;  
+            case 2:  
+                printf( "请输入新姓名：" );  
+                scanf( "%s", p->xm );  
+                break;  
+            case 3:  
+                printf( "请输入新的数学成绩：" );  
+                scanf( "%f", p->sxcj );  
+                break;  
+            case 4:  
+                printf( "请输入新的程序设计成绩：" );  
+                scanf( "%f", p->cxsj );  
+                break;  
+            case 5:  
+                printf( "请输入新的总分：" );  
+                scanf( "%f", p->zf );  
+                break;  
+            case 6:  
+                return;  
+            default:  
+                printf( "选项错误！\n" );  
+                break;  
+            }  
+        }  
+        while ( choice != 6 );  
+    }  
+      
+      
+    /* 读取文件 */  
+    void readData()  
+    {  
+        FILE    *fp;  
+        STD *p1, *p2;  
+        fp = fopen( "students.txt", "r" ); /* 打开文件 */  
+        if ( !fp )  
+        {  
+            printf( "文件打开错误！\n" );  
+            return;  
+        }  
+        fscanf( fp, "%d\n", &NUM );  
+        head = p1 = p2 = (STD *) malloc( LEN );  
+        fscanf( fp, "%s\t%s\t%f\t%f\t%f\n", p1->xh, p1->xm, &p1->sxcj, &p1->cxsj, &p1->zf ); /*  */  
+        while ( !feof( fp ) )  
+        {  
+            p1 = (struct student *) malloc( LEN );  
+            fscanf( fp, "%s\t%s\t%f\t%f\t%f\n", p1->xh, p1->xm, &p1->sxcj, &p1->cxsj, &p1->zf );  
+            p2->next = p1;  
+            p2      = p1;  
+        }  
+        p2->next = NULL;  
+        fclose( fp );  
+    }  
+      
+      
+    /* 写入文件 */  
+    void writeData()  
+    {  
+        FILE    * fp; /* 文件指针 */  
+        STD *p;  
+        fp = fopen( "students.txt", "w+" );  
+        if ( !fp )  
+        {  
+            printf( "文件打开错误！\n" );  
+            return;  
+        }  
+        fprintf( fp, "%d\n", NUM );  
+        for ( p = head; p != NULL; p = p->next )  
+        {  
+            print(p);  
+            fprintf( fp, "%s\t%s\t%f\t%f\t%f\n", p->xh, p->xm, p->sxcj, p->cxsj, p->zf );  
+        }  
+        fclose( fp );  
+    }  
+      
+      
+    /* 释放结点 */  
+    void freeAll()  
+    {  
+        STD *p1, *p2;  
+        p1 = p2 = head;  
+        while ( p1 )  
+        {  
+            p2 = p1->next;  
+            free( p1 );  
+            p1 = p2;  
+        }  
+    }  
